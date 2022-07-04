@@ -1,6 +1,9 @@
 #include "hidkeyboard.h"
-#define EPNUM_HID 0x02
+#define EPNUM_HID 0x06
 #if CFG_TUD_HID
+
+uint8_t keycode[6] = {0};
+uint8_t key_count = 0;
 
 HIDkeyboard::HIDkeyboard(uint8_t reportid)
 {
@@ -27,6 +30,13 @@ bool HIDkeyboard::begin(char *str)
 
 bool HIDkeyboard::sendKey(uint8_t _keycode, uint8_t modifier)
 {
+  keycode[0] = 0;
+  keycode[1] = 0;
+  keycode[2] = 0;
+  keycode[3] = 0;
+  keycode[4] = 0;
+  keycode[5] = 0;
+  key_count = 0;
   /*------------- Keyboard -------------*/
   if (tud_hid_ready())
   {
@@ -45,14 +55,25 @@ bool HIDkeyboard::sendChar(uint8_t _keycode)
 
 bool HIDkeyboard::sendPress(uint8_t _keycode, uint8_t modifier)
 {
-  uint8_t keycode[6] = {0};
-  keycode[0] = _keycode;
+  if (key_count<5) {
+    keycode[key_count] = _keycode;
+    key_count++;
+  }
+  // uint8_t keycode[6] = {0};
+  // keycode[0] = _keycode;
 
   return tud_hid_keyboard_report(report_id, modifier, keycode);
 }
 
 bool HIDkeyboard::sendRelease()
 {
+  keycode[0] = 0;
+  keycode[1] = 0;
+  keycode[2] = 0;
+  keycode[3] = 0;
+  keycode[4] = 0;
+  keycode[5] = 0;
+  key_count = 0;
   // send empty key report if previously has key pressed
   return tud_hid_keyboard_report(report_id, 0, NULL);
 }
@@ -60,10 +81,11 @@ bool HIDkeyboard::sendRelease()
 bool HIDkeyboard::sendString(const char* _text)
 {
   size_t len = strlen(_text);
-  uint8_t keycode;
+  uint8_t skeycode;
+  
   for(size_t i = 0; i < len; i++) {
-    keycode = (uint8_t) _text[i];
-    if(!sendKey(keymap[keycode].usage, keymap[keycode].modifier)) return false;
+    skeycode = (uint8_t) _text[i];
+    if(!sendKey(keymap[skeycode].usage, keymap[skeycode].modifier)) return false;
     delay(2);
   }
 
