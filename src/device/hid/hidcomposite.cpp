@@ -8,6 +8,7 @@ HIDcomposite::HIDcomposite(uint8_t id)
     report_keyboard = id + 1;
     enableHID = true;
     _EPNUM_HID = EPNUM_HID;
+    currentKeymap = keymap_us;
 }
 
 bool HIDcomposite::begin(char *str)
@@ -126,7 +127,7 @@ bool HIDcomposite::sendKey(uint8_t _keycode, uint8_t modifier)
 
 bool HIDcomposite::sendChar(uint8_t _keycode)
 {
-  return sendKey(keymap[_keycode].usage, keymap[_keycode].modifier);
+  return sendKey(currentKeymap[_keycode].usage, currentKeymap[_keycode].modifier);
 }
 
 bool HIDcomposite::sendPress(uint8_t _keycode, uint8_t modifier)
@@ -149,7 +150,7 @@ bool HIDcomposite::sendString(const char* _text)
   uint8_t keycode;
   for(size_t i = 0; i < len; i++) {
     keycode = (uint8_t) _text[i];
-    if(!sendKey(keymap[keycode].usage, keymap[keycode].modifier)) return false;
+    if(!sendKey(currentKeymap[keycode].usage, currentKeymap[keycode].modifier)) return false;
     delay(2);
   }
 
@@ -160,6 +161,16 @@ bool HIDcomposite::sendString(String text)
 {
   return sendString(text.c_str());
 }
+
+bool HIDcomposite::setKeymap(const KEYMAP* keymap) {
+  currentKeymap = keymap;
+  return true;
+}
+
+const KEYMAP* HIDcomposite::getKeymap() {
+  return currentKeymap;
+}
+
 /*------------- Keyboard -------------*/
 
 #endif

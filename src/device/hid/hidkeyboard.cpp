@@ -7,6 +7,7 @@ HIDkeyboard::HIDkeyboard(uint8_t reportid)
   report_id = reportid;
   enableHID = true;
   _EPNUM_HID = EPNUM_HID;
+  currentKeymap = keymap_us;
 }
 
 bool HIDkeyboard::begin(char *str)
@@ -40,7 +41,7 @@ bool HIDkeyboard::sendKey(uint8_t _keycode, uint8_t modifier)
 
 bool HIDkeyboard::sendChar(uint8_t _keycode)
 {
-  return sendKey(keymap[_keycode].usage, keymap[_keycode].modifier);
+  return sendKey(currentKeymap[_keycode].usage, currentKeymap[_keycode].modifier);
 }
 
 bool HIDkeyboard::sendPress(uint8_t _keycode, uint8_t modifier)
@@ -63,7 +64,7 @@ bool HIDkeyboard::sendString(const char* _text)
   uint8_t keycode;
   for(size_t i = 0; i < len; i++) {
     keycode = (uint8_t) _text[i];
-    if(!sendKey(keymap[keycode].usage, keymap[keycode].modifier)) return false;
+    if(!sendKey(currentKeymap[keycode].usage, currentKeymap[keycode].modifier)) return false;
     delay(2);
   }
 
@@ -73,6 +74,15 @@ bool HIDkeyboard::sendString(const char* _text)
 bool HIDkeyboard::sendString(String text)
 {
   return sendString(text.c_str());
+}
+
+bool HIDkeyboard::setKeymap(const KEYMAP* keymap) {
+  currentKeymap = keymap;
+  return true;
+}
+
+const KEYMAP* HIDkeyboard::getKeymap() {
+  return currentKeymap;
 }
 
 #endif

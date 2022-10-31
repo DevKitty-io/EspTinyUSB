@@ -17,6 +17,11 @@ public:
     bool sendRelease();
     bool sendString(const char* text);
     bool sendString(String text);
+    bool setKeymap(const KEYMAP* locale);
+    const KEYMAP* getKeymap();
+
+private:
+    const KEYMAP* currentKeymap;
 };
 
 #endif
